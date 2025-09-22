@@ -17,6 +17,7 @@ export const poolDB = mysql.createPool({
   charset: 'utf8mb4' // Recommended for full Unicode support
 });
 
+
 async function testConnection() {
   let connection;
   try {
