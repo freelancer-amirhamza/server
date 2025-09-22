@@ -76,7 +76,7 @@ export  const deleteServiceCard = async(req, res)=>{
         if(!id ){
             return errorHandler(res,404, "The Id is required!");
         }
-        const deletedCard = await poolDB.query(`DELETE FROM service_cards WHERE id=$1 RETURNING *`,[id]);
+        const deletedCard = await Service.delete(id);
         if(!deletedCard){
             return errorHandler(res,404, "The card is not deleted!")
         }

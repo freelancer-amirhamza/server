@@ -6,34 +6,36 @@ const contactModel = {
     // create data
     async create(data){
         const {id, address, email, phone}= data;
-        const response = await poolDB.query(`INSERT INTO contact(id,address,email,phone) VALUES($1,$2,$3,$4) RETURNING *`,
+        const [response]= await poolDB.query(`INSERT INTO contact(id,address,email,phone) VALUES(?,?,?,?)`,
             [id, address, email, phone]);
-            return response.rows[0];
+            if(response.affectedRows === 0){
+                return null;
+            };
+        const [rows] = await poolDB.execute(`SELECT * FROM contact WHERE id=?`,[id]);
+        return rows[0];
     },
 
     // find data by id
     async findById(id){
-        const response = await poolDB.query(`SELECT * FROM contact WHERE id=$1`,[id]);
-        return response.rows[0];
+        const [rows] = await poolDB.execute(`SELECT * FROM contact WHERE id=?`,[id]);
+        return rows[0];
     },
 
     // find all data
     async findAll(){
-        const response = await poolDB.query(`SELECT * FROM contact ORDER BY created_at DESC`);
-        return response.rows;
+        const [response] = await poolDB.execute(`SELECT * FROM contact ORDER BY created_at DESC`);
+        return response;
     },
 
     // update data
     async update(id,data){
         const fields = [];
         const values = [];
-        let paramCount = 1;
 
         Object.keys(data).map((key)=>{
             if(data[key] !== undefined){
-                fields.push(`${key} =$${paramCount}`);
+                fields.push(`${key} =?`);
                 values.push(data[key]);
-                paramCount++;
             }
         });
 
@@ -42,18 +44,21 @@ const contactModel = {
         };
 
         values.push(id);
-        const response = await poolDB.query(`
+        const [response ]= await poolDB.execute(`
             UPDATE contact SET ${fields.join(", ")},
             updated_at = CURRENT_TIMESTAMP
-            WHERE id=$${paramCount} RETURNING *`,
-        values);
-        return response.rows[0];
+            WHERE id=?`,values);
+        return response[0];
     },
 
     // delete data
     async delete(id){
-        const response = await poolDB.query(`DELETE FROM contact WHERE id=$1 RETURNING *`,[id]);
-        return response.rows[0];
+        const [rows] = await poolDB.execute(`SELECT * FROM contact WHERE id=?`,[id]);
+        const [response]= await poolDB.execute(`DELETE FROM contact WHERE id=?`,[id]);
+        if(response.affectedRows === 0){
+            return null
+        }
+        return rows[0];
     }
 
 

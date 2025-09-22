@@ -1,9 +1,11 @@
 import express from "express";
-import { createProjectCard,
+import {
+     createProjectCard,
      deleteProjectCard,
-      getAllProjectCards,
-       getProjectCardById,
-       updateProjectCard }from "../controllers/projects.controller.js";
+     getAllProjectCards,
+     getProjectCardById,
+     updateProjectCard
+} from "../controllers/projects.controller.js";
 
 const router = express.Router();
 

@@ -1,83 +1,46 @@
 import {v4 as uuidv4} from "uuid";
 import { poolDB } from "../../config/db.config.js";
+import db from "../../models/index.js";
+import { errorHandler } from "../../utils/errorHandler.js";
 
 
-
+const Hero = db.hero;
 
 export const  createBannerSlide = async(req, res)=>{
     try {
         const {image, heading, title, text} = req.body;
         const id =uuidv4();
         // create banner slide
-
-        const newSlide = await poolDB.query(
-          "INSERT INTO bannerslide(id, image, heading, title, text) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-        [id, image, heading, title, text]
-        )
-        res.status(200).json({
-            success:true,
-            error:false,
-            message:"The slide was created successfully!",
-            data:newSlide.rows,
-        })
+        const newSlide = await Hero.create({id, image, heading, title, text});
+        return errorHandler(res,200,"The slide was created successfully!",false,newSlide)
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: true,
-            message: error.message || "Internal server error!"
-        })
+        return errorHandler(res,500,error.message || "Internal server error!")
     }
 }
 
 
 export const getAllSlides = async(req, res)=>{
     try {
-        const allSlides = await poolDB.query("SELECT * FROM bannerslide");
+        const allSlides = await Hero.findAll();
         if(!allSlides){
-            res.status(404).json({
-                success:false,
-                error:true,
-                message: "Slides are not found!"
-            })
+            return errorHandler(res,404,"Slides are not found!")
         }
-        res.status(200).json({
-            success: true,
-            error: false,
-            message: "Slides are gotten successfully!",
-            data: allSlides.rows,
-        })
+        return errorHandler(res,200,"Slides are gotten successfully!",false, allSlides);
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: true,
-            message: error.message || "Internal server error!"
-        })
+        return errorHandler(res,500,error.message || "Internal server error!");
     }
 }
 
 export const  getSlideById = async (req, res)=>{
     try {
         const {id} = req.body;
-        const slide = await poolDB.query("SELECT * FROM bannerslide WHERE id=$1", [id]);
+        const slide = await Hero.findById(id)
         if(!slide){
-            res.status(404).json({
-                success: false,
-                error:true,
-                message: "The slide is not found!",
-            })
+            return errorHandler(res, 404,"The slide is not found!",)
         }
-        res.status(200).json({
-            success: true,
-            error: false,
-            message: "The slide is found successfully!",
-            data: slide.rows,
-        })
+        return errorHandler(res, 201,"The slide is found successfully!",false, slide);
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: true,
-            message: error.message || "Internal server error!"
-        })
+        return errorHandler(res,500,error.message || "Internal server error!");
     }
 }
 
@@ -85,55 +48,26 @@ export const  getSlideById = async (req, res)=>{
 export const  deleteSlideById = async (req, res)=>{
     try {
         const {id} = req.body;
-        const slide = await poolDB.query("DELETE FROM bannerslide WHERE id=$1",[id]);
+        const slide = await Hero.delete(id);
         if(!slide){
-            res.status(404).json({
-                success: false,
-                error:true,
-                message: "The slide is not found!",
-            })
+            return errorHandler(res,404,"The slide is not found!")
         }
-        res.status(200).json({
-            success: true,
-            error: false,
-            message: "The slide is deleted successfully!",
-            data: slide.rows,
-        })
+        return errorHandler(res,201,"The slide is deleted successfully!",false,slide);
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: true,
-            message: error.message || "Internal server error!"
-        })
+        return errorHandler(res,500,error.message || "Internal server error!");
     }
 }
 
 export const updateSlide = async (req, res) => {
     try {
         const { id, image, heading, title, text } = req.body;
-        const updateSlide = await poolDB.query(
-            "UPDATE bannerslide SET image=$1, heading=$2, title=$3, text=$4 WHERE id=$5 RETURNING *",
-            [image, heading, title, text, id]
-        );
-        if (updateSlide.rows.length === 0) {
-            return res.status(404).json({
-                success: false,
-                error: true,
-                message: "Slide not found!",
-            });
+        const updateSlide = await Hero.update(id,{image, heading, title, text});
+        if (!updateSlide) {
+            return errorHandler(res,404,"The slide is not found!")
         }
-        res.status(200).json({
-            success: true,
-            error: false,
-            message: "The slide updated successfully!",
-            data: updateSlide.rows,
-        });
+        return errorHandler(res,200, "The slide updated successfully!",false, updateSlide);
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: true,
-            message: error.message || "Internal server error!"
-        });
+        return errorHandler(res,500,error.message || "Internal server error!");
     }
 }
 
@@ -141,106 +75,61 @@ export const createHeroFooter = async(req, res)=>{
     try {
         const {text, btn_text} = req.body;
         const id =uuidv4();
-        const createdFooter = await poolDB.query(
-            "INSERT INTO herofooter(id, text, btn_text) VALUES($1, $2, $3) RETURNING *",
+        const [rows] = await poolDB.execute(
+            "INSERT INTO herofooter(id, text, btn_text) VALUES(?,?,?) ",
             [id,text,btn_text]
         );
-        res.status(200).json({
-            success: true,
-            error: false,
-            message: "hero footer created successfully!",
-            data: createdFooter.rows,
-        })
+         if (rows.affectedRows === 0) {
+            return errorHandler(res,404,"Footer not found!");
+        }
+        const [createdFooter] = await poolDB.execute("SELECT * FROM herofooter WHERE id=?",[ id]);
+        return errorHandler(res,201,"hero footer created successfully!",false,createdFooter[0]);
     } catch (error) {
-        res.status(500).json({
-            success:false,
-            error: true,
-            message: error.message || "Internal server error!"
-        })
+        return errorHandler(res,500,error.message || "Internal server error!");
     }
 }
 
 export const updateHeroFooter = async(req, res)=>{
     try {
         const {text, btn_text, id} = req.body;
-        const updatedFooter = await poolDB.query(
-            "UPDATE herofooter SET text=$1, btn_text=$2 WHERE id=$3 RETURNING *",
+          const [rows] = await poolDB.execute(
+            "UPDATE herofooter SET text=?, btn_text=? WHERE id=?",
             [text, btn_text, id]
         )
-        if (updatedFooter.rows.length === 0) {
-            return res.status(404).json({
-                success: false,
-                error: true,
-                message: "Footer not found!",
-            });
+        if (rows.affectedRows === 0) {
+            return errorHandler(res,404,"Footer not found!");
         }
-        res.status(200).json({
-            success: true,
-            error: false,
-            message: "The footer updated successfully!",
-            data: updatedFooter.rows,
-        });
+        const [updatedFooter] = await poolDB.execute("SELECT * FROM herofooter WHERE id=?",[ id]);
+        return errorHandler(res,201,"The footer updated successfully!",false, updatedFooter[0]);
     } catch (error) {
-        res.status(500).json({
-            success:false,
-            error: true,
-            message: error.message || "Internal server error!"
-        })
+        return errorHandler(res,500,error.message || "Internal server error!");
     }
 }
 
 export const deleteHeroFooter = async(req, res)=>{
     try {
         const {id} = req.body;
-        const deletedFooter = await poolDB.query(
-            "DELETE FROM herefooter WHERE id=$1 RETURNING *",
-            [ id]
-        )
-        if (deletedFooter.rows.length === 0) {
-            return res.status(404).json({
-                success: false,
-                error: true,
-                message: "footer not found!",
-            });
+         const [rows] = await poolDB.execute("DELETE FROM herofooter WHERE id=?",[id]);
+         if (rows.affectedRows === 0) {
+            return errorHandler(res,404,"Footer not found!");
         }
-        res.status(200).json({
-            success: true,
-            error: false,
-            message: "The footer deleted successfully!",
-            data: deletedFooter.rows,
-        });
+        const deletedFooter = await poolDB.execute("SELECT * FROM herofooter WHERE id=?",[ id]);
+        return errorHandler(res,201,"The footer deleted successfully!",false,deletedFooter[0]);
     } catch (error) {
-        res.status(500).json({
-            success:false,
-            error: true,
-            message: error.message || "Internal server error!"
-        })
+        return errorHandler(res,500,error.message || "Internal server error!");
     }
 }
 
 export const getAllHeroFooters = async(req, res)=>{
     try {
-        const getFooters = await poolDB.query(
+        const [getFooters] = await poolDB.execute(
             "SELECT * FROM herofooter",
         )
-        if (getFooters.rows.length === 0) {
-            return res.status(404).json({
-                success: false,
-                error: true,
-                message: "Footers not found!",
-            });
+        if (getFooters.affectedRows === 0) {
+            return errorHandler(res,404,"Footer not found!");
         }
-        res.status(200).json({
-            success: true,
-            error: false,
-            message: "The footer gotten successfully!",
-            data: getFooters.rows,
-        });
+        return errorHandler(res,201,"The footer gotten successfully!",false,getFooters)
     } catch (error) {
-        res.status(500).json({
-            success:false,
-            error: true,
-            message: error.message || "Internal server error!"
-        })
+        return errorHandler(res,500,error.message || "Internal server error!");
     }
 }

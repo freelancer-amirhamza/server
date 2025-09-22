@@ -13,7 +13,7 @@ export const SignUp = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({
             id:id,
-            username: username,   
+            username: username,
             email: email,
             password: hashedPassword,
             fullName: fullName,
@@ -22,8 +22,7 @@ export const SignUp = async (req, res) => {
             role:""
         })
 
-        // const role = await Role.findByName("user");
-        // await user.setRoles([role]);
+
         res.status(201).json({
             success: true,
             error: false,

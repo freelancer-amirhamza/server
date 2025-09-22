@@ -14,4 +14,4 @@ router.post("/create-footer", createHeroFooter);
 router.put("/update-footer", updateHeroFooter);
 router.delete("/delete-footer", deleteHeroFooter);
 
-export default router;
+export default router; 
