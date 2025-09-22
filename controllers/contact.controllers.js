@@ -15,7 +15,7 @@ export const createContact = async(req,res)=>{
         if(!contact){
             return errorHandler(res,400,"The contact is not created")
         }
-        return errorHandler(res,200,"The contact is successfully created!",false,contact)
+        return errorHandler(res,200,"The contact is successfully created!", false, contact)
     } catch (error) {
         errorHandler(res,500,error?.message || "Internal server error!",)
     }
@@ -27,7 +27,7 @@ export const getContact = async (req, res)=>{
         if(contact.length == 0){
             return errorHandler(res,400,"The contact is not found")
         }
-        return errorHandler(res,200,"The contact is gotten successfully!",false,contact)
+        return errorHandler(res,200,"The contact is gotten successfully!", false, contact)
     } catch (error) {
         errorHandler(res,500,error.message || "Internal server error!")
     }
@@ -41,7 +41,6 @@ export const updateContact = async (req, res)=>{
             return errorHandler(res,400,"This contact is not found")
         }
         const updatedContact = await Contact.update(contact.id,{address,email,phone});
-
         return errorHandler(res,200,"The contact is updated successfully!",false,updatedContact)
     } catch (error) {
         errorHandler(res,500,error.message || "Internal server error!")
@@ -56,8 +55,7 @@ export const deleteContact = async (req, res)=>{
             return errorHandler(res,400,"This contact is not found")
         }
         const deletedContact = await Contact.delete(contact?.id);
-
-        return errorHandler(res,200,"The contact is deleted successfully!",false,deletedContact)
+        return errorHandler(res,200,"The contact is deleted successfully!", false, deletedContact)
     } catch (error) {
         errorHandler(res,500,error.message || "Internal server error!")
     }
