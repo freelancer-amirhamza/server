@@ -46,7 +46,7 @@ export const getPriceCardById = async(req,res)=>{
     } catch (error) {
         errorHandler(res,500,error.message || "Internal server error!")
     }
-}
+};
 
 // update price card
 export const updatePriceCard = async (req,res)=>{
@@ -76,4 +76,4 @@ export const deletePriceCard = async(req,res)=>{
     } catch (error) {
         errorHandler(res,500,error.message || "Internal server error!")
     }
-}
+};

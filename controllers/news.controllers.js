@@ -16,7 +16,7 @@ export const createNews = async (req, res)=>{
     } catch (error) {
         errorHandler(res,500,error.message|| "Internal server error!")
     }
-}
+};
 
 export const fetchAllNews = async (req, res)=>{
     try {
@@ -28,7 +28,7 @@ export const fetchAllNews = async (req, res)=>{
     } catch (error) {
         errorHandler(res,500,error.message|| "Internal server error!")
     }
-}
+};
 
 export const fetchNewsById = async (req, res)=>{
     try {
@@ -54,7 +54,8 @@ export const updateNews = async (req, res)=>{
     } catch (error) {
         errorHandler(res,500,error.message|| "Internal server error!")
     }
-}
+};
+
 export const deleteNews= async (req, res)=>{
     try {
         const {id} = req.body;

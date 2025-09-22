@@ -1,28 +1,16 @@
 import uploadImageCloudinary from "../config/cloudinary.js";
+import { errorHandler } from "../utils/errorHandler.js";
 
 const uploadImage = async (req, res) => {
     try {
         const file = req.file;
-        if (!file) {
-            return res.status(400).json({
-                success: false,
-                error: true,
-                message: "No file uploaded!"
-            });
-        }
+        if(!file){
+            return errorHandler(res,400,"No file uploaded!")
+        };
         const uploadedImage = await uploadImageCloudinary(file);
-        return res.status(201).json({
-            success: true,
-            error: false,
-            message: "The image uploaded successfully!",
-            data: uploadedImage,
-        });
+        return errorHandler(res,201,"The image uploaded successfully!",false, uploadedImage);
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: true,
-            message: error.message || "Internal server error!",
-        });
+        return errorHandler(res, 500,error.message || "Internal server error!",)
     }
 }
 
